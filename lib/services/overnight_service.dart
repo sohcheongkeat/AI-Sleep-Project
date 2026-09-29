@@ -8,7 +8,7 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 /// notification (required to use the mic with the screen off).
 /// iOS: nothing to do here — an active recording plus the "audio" background
 /// mode in Info.plist keeps the app running.
-class KeepAlive {
+class OvernightService {
   static void init() {
     if (!Platform.isAndroid) return;
     FlutterForegroundTask.init(

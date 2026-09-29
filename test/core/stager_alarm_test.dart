@@ -47,6 +47,18 @@ void main() {
       expect(last, Stage.n3);
     });
 
+    test('deep sleep comes in capped blocks that need lightening to repeat', () {
+      final s = SleepStager();
+      final stages = [for (var i = 0; i < 200; i++) s.classify(still(b: regular)).stage];
+      final n3 = stages.where((x) => x == Stage.n3).length;
+      expect(n3, 60, reason: 'one 30-minute block, then N2');
+      expect(stages.last, Stage.n2);
+
+      s.classify(const EpochInput(movement: 0.05, snores: 0, breathing: regular)); // stir
+      final again = [for (var i = 0; i < 40; i++) s.classify(still(b: regular)).stage];
+      expect(again, contains(Stage.n3), reason: 'a new block after lightening');
+    });
+
     test('snoring counts as sleep, not N1', () {
       final s = SleepStager();
       s.classify(still(b: regular));

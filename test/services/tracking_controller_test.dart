@@ -26,9 +26,9 @@ class FakePlatform implements TrackingPlatform {
   @override
   Future<void> stopAudio() async => audioStopped = true;
   @override
-  Future<void> startKeepAlive() async {}
+  Future<void> startOvernightService() async {}
   @override
-  Future<void> stopKeepAlive() async {}
+  Future<void> stopOvernightService() async {}
   @override
   Future<void> scheduleAlarm(DateTime at) async => scheduledAt = at;
   @override

@@ -14,7 +14,7 @@ import '../data/night_repository.dart';
 import '../data/wav.dart';
 import 'alarm_service.dart';
 import 'audio_capture.dart';
-import 'keep_alive.dart';
+import 'overnight_service.dart';
 
 /// The device-specific pieces the controller needs, so the overnight flow
 /// can be tested without a phone.
@@ -22,8 +22,8 @@ abstract class TrackingPlatform {
   Future<bool> micPermission();
   Future<void> startAudio(void Function(Float64List frame) onFrame);
   Future<void> stopAudio();
-  Future<void> startKeepAlive();
-  Future<void> stopKeepAlive();
+  Future<void> startOvernightService();
+  Future<void> stopOvernightService();
   Future<void> scheduleAlarm(DateTime at);
   Future<void> ringAlarmNow();
   Future<void> stopAlarm();
@@ -32,7 +32,7 @@ abstract class TrackingPlatform {
 }
 
 class DeviceTrackingPlatform implements TrackingPlatform {
-  final _capture = AudioCapture();
+  late final _capture = AudioCapture();
 
   @override
   Future<bool> micPermission() => _capture.hasPermission();
@@ -41,9 +41,9 @@ class DeviceTrackingPlatform implements TrackingPlatform {
   @override
   Future<void> stopAudio() => _capture.stop();
   @override
-  Future<void> startKeepAlive() => KeepAlive.start();
+  Future<void> startOvernightService() => OvernightService.start();
   @override
-  Future<void> stopKeepAlive() => KeepAlive.stop();
+  Future<void> stopOvernightService() => OvernightService.stop();
   @override
   Future<void> scheduleAlarm(DateTime at) => AlarmService.scheduleDeadline(at);
   @override
@@ -150,7 +150,7 @@ class TrackingController extends ChangeNotifier {
       }
     });
 
-    await platform.startKeepAlive();
+    await platform.startOvernightService();
     await platform.startAudio(_onFrame);
     state = TrackingState.tracking;
     notifyListeners();
@@ -210,7 +210,7 @@ class TrackingController extends ChangeNotifier {
     final s = session;
     if (s == null) return null;
     await platform.stopAudio();
-    await platform.stopKeepAlive();
+    await platform.stopOvernightService();
     await platform.stopAlarm();
     await _ringingSub?.cancel();
     _ringingSub = null;

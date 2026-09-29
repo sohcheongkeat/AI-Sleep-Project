@@ -44,7 +44,7 @@ void main() {
     expect(at(40), anyOf(Stage.n2, Stage.n3));
     expect(at(120), anyOf(Stage.n2, Stage.n3), reason: 'snoring phase');
     expect(at(317), Stage.n1, reason: 'stirring phase');
-    expect(at(451), Stage.n3, reason: 'snoring in the window does not wake you');
+    expect(at(451), anyOf(Stage.n2, Stage.n3), reason: 'snoring in the window does not wake you');
 
     expect(fired, hasLength(1));
     expect(fired.single.$1, 'Woke you in light sleep (N1)');

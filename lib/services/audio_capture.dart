@@ -13,7 +13,7 @@ class AudioCapture {
   static const frameSize = 1600; // 100 ms
   static const frameRate = sampleRate / frameSize;
 
-  final _recorder = AudioRecorder();
+  late final _recorder = AudioRecorder();
   StreamSubscription<Uint8List>? _sub;
   final _pending = BytesBuilder(copy: false);
 

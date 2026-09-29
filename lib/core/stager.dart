@@ -41,6 +41,9 @@ class StagerConfig {
     this.deepStillEpochs = 20,
     this.maxN1Epochs = 14,
     this.snoresForSleep = 2,
+    this.maxN3EarlyEpochs = 60,
+    this.maxN3LateEpochs = 20,
+    this.earlyNightEpochs = 360,
   });
 
   final double wakeMovement; // ~4.5 s of rustling in 30 s => awake
@@ -51,6 +54,13 @@ class StagerConfig {
   final int deepStillEpochs; // 10 min of stillness before N3 is plausible
   final int maxN1Epochs; // N1 rarely lasts > ~7 min
   final int snoresForSleep;
+
+  /// Deep sleep comes in blocks of ~20–40 min, mostly in the first cycles of
+  /// the night. A block is capped at 30 min in the first 3 h of sleep and
+  /// 10 min after; the next block needs sleep to lighten first.
+  final int maxN3EarlyEpochs;
+  final int maxN3LateEpochs;
+  final int earlyNightEpochs;
 }
 
 class StageResult {
@@ -66,6 +76,9 @@ class SleepStager {
   Stage _prev = Stage.wake;
   int _stillEpochs = 0;
   int _n1Run = 0;
+  int _n3Run = 0;
+  int _asleepEpochs = 0;
+  bool _n3Spent = false; // current deep block used up; wait for lightening
 
   StageResult classify(EpochInput e) {
     final c = config;
@@ -104,6 +117,16 @@ class SleepStager {
       }
     }
     if (stage != Stage.n1) _n1Run = 0;
+
+    if (stage == Stage.n3) {
+      _n3Run++;
+      final cap = _asleepEpochs < c.earlyNightEpochs ? c.maxN3EarlyEpochs : c.maxN3LateEpochs;
+      if (_n3Run > cap) _n3Spent = true;
+      if (_n3Spent) (stage, reason) = (Stage.n2, 'deep block ended');
+    }
+    if (stage != Stage.n3) _n3Run = 0;
+    if (stage == Stage.n1 || stage == Stage.wake) _n3Spent = false;
+    if (stage.isAsleep) _asleepEpochs++;
 
     _prev = stage;
     return StageResult(stage, reason);
