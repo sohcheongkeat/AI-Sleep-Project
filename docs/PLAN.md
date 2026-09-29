@@ -1,4 +1,4 @@
-# AI Sleep Project — v1 Plan (draft, awaiting approval)
+# AI Sleep Project — v1 Plan (approved)
 
 A cross-platform mobile app that tracks snoring overnight and wakes the user
 during light sleep (N1) inside a chosen window before their wake-up time.
@@ -49,5 +49,5 @@ during light sleep (N1) inside a chosen window before their wake-up time.
 
 ## Open items
 
-- User approval of this plan before implementation starts
-- Confirm Flutter SDK can be installed in the dev environment
+- ~~User approval~~ — approved
+- ~~Flutter SDK available~~ — Flutter 3.47.5 stable
