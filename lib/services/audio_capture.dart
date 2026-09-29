@@ -29,6 +29,8 @@ class AudioCapture {
       echoCancel: false,
       noiseSuppress: false,
       androidConfig: AndroidRecordConfig(audioSource: AndroidAudioSource.mic),
+      // Resume on its own after a phone call or another app's audio.
+      audioInterruption: AudioInterruptionMode.pauseResume,
     ));
     const frameBytes = frameSize * 2;
     _sub = stream.listen((chunk) {

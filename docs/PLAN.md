@@ -47,7 +47,16 @@ during light sleep (N1) inside a chosen window before their wake-up time.
 4. Local database, recording management, export
 5. Store prep: permission strings, privacy policy, icons, wellness wording
 
+## Status
+
+1. Detection core + tests — done
+2. Overnight capture + alarm — done (needs on-device testing, see DEVICE_TESTING.md)
+3. UI — done (render-tested)
+4. Storage, clips, export — done
+5. Store prep — drafts in PRIVACY_POLICY.md and STORE_LISTING.md
+
 ## Open items
 
-- ~~User approval~~ — approved
-- ~~Flutter SDK available~~ — Flutter 3.47.5 stable
+- App name (placeholder "AI Sleep"), icon, bundle/application IDs, release signing
+- On-device testing (Android SDK / iOS toolchain not available in the build environment)
+- Calibrate detection thresholds on real nights
