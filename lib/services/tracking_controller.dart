@@ -78,6 +78,7 @@ class TrackingController extends ChangeNotifier {
   static const minSecondsBetweenClips = 300;
   static const maxClipSeconds = 5.0;
   static const autosaveEpochs = 20; // every 10 minutes
+  static const minNightLength = Duration(minutes: 2);
 
   final _extractor = FeatureExtractor(
     sampleRate: AudioCapture.sampleRate,
@@ -104,7 +105,10 @@ class TrackingController extends ChangeNotifier {
 
   /// Saves run one after another so an autosave can't overwrite a later save.
   Future<void> _queueSave(NightRecord r) =>
-      _saves = _saves.then((_) => repository.save(r)).catchError((Object _) {});
+      _saves = _saves.then((_) => repository.save(r)).catchError((Object e) {
+        // Keep the queue alive for the next save, but don't hide the failure.
+        debugPrint('Saving night ${r.id} failed: $e');
+      });
 
   Stage? get currentStage => session?.currentStage;
   int get snoreCount => session?.snores.length ?? 0;
@@ -215,14 +219,16 @@ class TrackingController extends ChangeNotifier {
     await _ringingSub?.cancel();
     _ringingSub = null;
 
+    s.finish();
     final record = _buildRecord();
     session = null;
     state = TrackingState.idle;
     notifyListeners();
 
     await _saves;
-    if (record.epochs.isEmpty) {
-      await repository.delete(record); // also removes any clips
+    // Stopped straight away (an accidental start): keep nothing.
+    if (record.epochs.isEmpty || record.end.difference(record.start) < minNightLength) {
+      await repository.delete(record); // also removes any clips and autosaves
       return null;
     }
     await _queueSave(record);

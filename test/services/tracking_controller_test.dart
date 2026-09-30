@@ -118,11 +118,11 @@ void main() {
     expect(c.alarmReason, 'Wake-up time reached');
   });
 
-  test('a night stopped within 30 seconds is discarded', () async {
+  test('a night stopped within 2 minutes is discarded', () async {
     final p = FakePlatform();
     final c = TrackingController(repository: repo, platform: p);
     await c.start(saveClips: false);
-    p.feed(10);
+    p.feed(90);
     expect(await c.finish(), isNull);
     expect(await repo.loadAll(), isEmpty);
   });

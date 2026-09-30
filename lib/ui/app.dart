@@ -30,7 +30,7 @@ class AiSleepApp extends StatelessWidget {
       store: store,
       tracking: tracking,
       child: MaterialApp(
-        title: 'AI Sleep',
+        title: 'Sleep Coach',
         theme: buildTheme(),
         debugShowCheckedModeBanner: false,
         home: ListenableBuilder(

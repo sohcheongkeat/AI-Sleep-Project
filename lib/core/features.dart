@@ -12,6 +12,8 @@ class FrameFeatures {
     required this.lowRatio,
     required this.highRatio,
     required this.breathDb,
+    required this.lowDb,
+    required this.highDb,
   });
 
   /// Overall loudness in dBFS.
@@ -23,8 +25,16 @@ class FrameFeatures {
   /// Share of 50–7500 Hz energy in the 2–7.5 kHz band (rustling, movement).
   final double highRatio;
 
-  /// Loudness of the 100–1500 Hz band, where breath noise lives.
+  /// Loudness of the 250–2000 Hz band, where breath noise lives (starting
+  /// above mains hum and fan rumble).
   final double breathDb;
+
+  /// Loudness of the 60–500 Hz snore band. Breath noise has little energy
+  /// here, so snores stand out even when breathing is audible.
+  final double lowDb;
+
+  /// Loudness of the 2–7.5 kHz band: rustling bedding and movement.
+  final double highDb;
 }
 
 /// Converts little-endian 16-bit PCM bytes to samples in [-1, 1].
@@ -75,11 +85,15 @@ class FeatureExtractor {
     }
 
     final total = band(50, 7500);
+    final low = band(60, 500);
+    final high = band(2000, 7500);
     return FrameFeatures(
       levelDb: powerToDb(sumSq / frameSize),
-      lowRatio: total > 0 ? band(60, 500) / total : 0,
-      highRatio: total > 0 ? band(2000, 7500) / total : 0,
-      breathDb: powerToDb(band(100, 1500) / fftSize),
+      lowRatio: total > 0 ? low / total : 0,
+      highRatio: total > 0 ? high / total : 0,
+      breathDb: powerToDb(band(250, 2000) / fftSize),
+      lowDb: powerToDb(low / fftSize),
+      highDb: powerToDb(high / fftSize),
     );
   }
 }

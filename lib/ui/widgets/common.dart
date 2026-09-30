@@ -64,6 +64,6 @@ class SectionTitle extends StatelessWidget {
 }
 
 const wellnessDisclaimer =
-    'AI Sleep estimates sleep stages from sound. It is not a medical device and '
+    'Sleep Coach estimates sleep stages from sound. It is not a medical device and '
     'does not diagnose or treat any condition. If you are worried about your '
     'sleep or snoring, talk to a doctor.';

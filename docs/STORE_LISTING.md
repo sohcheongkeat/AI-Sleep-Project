@@ -15,7 +15,7 @@ Track snoring and wake up gently in light sleep. Private, on-device.
 
 ## Full description (draft)
 
-AI Sleep listens while you sleep to track snoring and estimate your sleep
+Sleep Coach listens while you sleep to track snoring and estimate your sleep
 stages, then wakes you during light sleep within a window you choose, so
 mornings feel less abrupt.
 
@@ -26,7 +26,7 @@ mornings feel less abrupt.
 • Trends: see how alcohol, caffeine, exercise and more affect your nights.
 • Private: sound is analysed on your phone. No account. Nothing uploaded.
 
-AI Sleep provides wellness information only and is not a medical device.
+Sleep Coach provides wellness information only and is not a medical device.
 
 ## Google Play: Data safety form
 
@@ -55,7 +55,6 @@ AI Sleep provides wellness information only and is not a medical device.
 
 ## Assets still needed
 
-- App name (placeholder: "AI Sleep")
 - Icon (1024×1024)
 - Screenshots (render them with the screen tests, or capture from a device)
 - Privacy policy URL (host `docs/PRIVACY_POLICY.md` once finalised)

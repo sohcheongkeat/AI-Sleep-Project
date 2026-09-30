@@ -29,11 +29,18 @@ class SyntheticNight {
 
   double _noise(double amp) => (_rng.nextDouble() * 2 - 1) * amp;
 
-  FrameFeatures _quiet(double breathDb) => FrameFeatures(
-        levelDb: _floorDb + _noise(1),
-        lowRatio: 0.3,
-        highRatio: 0.1,
+  FrameFeatures _quiet(double breathDb) => _f(_floorDb + _noise(1), 0.3, 0.1, breathDb);
+
+  /// Band levels follow the overall level for the band a sound lives in,
+  /// and stay at the floor otherwise.
+  FrameFeatures _f(double level, double lowRatio, double highRatio, double breathDb) =>
+      FrameFeatures(
+        levelDb: level,
+        lowRatio: lowRatio,
+        highRatio: highRatio,
         breathDb: breathDb,
+        lowDb: lowRatio >= 0.45 ? level : _floorDb + _noise(1),
+        highDb: highRatio >= 0.2 ? level : _floorDb + _noise(1),
       );
 
   FrameFeatures _frame(Phase p, double t) {
@@ -50,22 +57,19 @@ class SyntheticNight {
         final cycle = t % (60 / 13);
         final breath = -70 + 3 * math.sin(2 * math.pi * t * 13 / 60) + _noise(0.3);
         if (cycle < 1.2) {
-          return FrameFeatures(
-              levelDb: _floorDb + 20 + _noise(1), lowRatio: 0.8, highRatio: 0.05, breathDb: breath);
+          return _f(_floorDb + 30 + _noise(1), 0.8, 0.05, breath);
         }
         return _quiet(breath);
       case Phase.awake:
         // Rustling for 6 s out of every 15 s.
         if (t % 15 < 6) {
-          return FrameFeatures(
-              levelDb: _floorDb + 15 + _noise(2), lowRatio: 0.2, highRatio: 0.5, breathDb: -65 + _noise(2));
+          return _f(_floorDb + 28 + _noise(2), 0.2, 0.5, -65 + _noise(2));
         }
         return _quiet(-70 + _noise(2));
       case Phase.stir:
         // One 2 s shift in position per 30 s, breathing otherwise shallow.
         if (t % 30 < 2) {
-          return FrameFeatures(
-              levelDb: _floorDb + 14 + _noise(1), lowRatio: 0.2, highRatio: 0.45, breathDb: -66);
+          return _f(_floorDb + 26 + _noise(1), 0.2, 0.45, -66);
         }
         return _quiet(-70 + _noise(2));
     }

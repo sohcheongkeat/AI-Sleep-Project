@@ -1,4 +1,4 @@
-# AI Sleep
+# Sleep Coach
 
 A Flutter app for iOS and Android that listens overnight through the phone's
 microphone to track snoring, estimate sleep stages, and wake you during light
@@ -6,7 +6,7 @@ sleep (N1) inside a window you choose before your wake-up time.
 
 Everything runs on the phone. No account, no server, no cloud AI.
 
-> AI Sleep estimates sleep stages from sound. It is not a medical device and
+> Sleep Coach estimates sleep stages from sound. It is not a medical device and
 > does not diagnose or treat any condition.
 
 ## Features (v1)
@@ -29,14 +29,15 @@ All in `lib/core/` (pure Dart, unit-tested):
 
 | Step | File | What it does |
 |---|---|---|
-| Features | `features.dart`, `fft.dart` | Every 100 ms: loudness, share of energy at 60–500 Hz (snore band), 2–7.5 kHz (rustling), 100–1500 Hz (breath) |
-| Snores & movement | `burst_detectors.dart` | Bursts above an adaptive noise floor. Snore = low-frequency, 0.3–3.5 s. Movement = broadband rustle, 0.4–20 s |
+| Features | `features.dart`, `fft.dart` | Every 100 ms: loudness in the 60–500 Hz snore band, the 2–7.5 kHz rustle band and the 250–2000 Hz breath band |
+| Snores & movement | `burst_detectors.dart` | Bursts above each band's adaptive noise floor. Snore = +15 dB in the snore band for 0.3–3.5 s. Movement = +20 dB in the rustle band for 0.4–20 s. (Audible breathing reaches about +12–14 dB, so it doesn't count as either.) |
 | Breathing | `breathing.dart` | Rate and regularity from autocorrelation of the breath-band loudness over 60 s |
 | Stage | `stager.dart` | Rules per 30 s epoch (below) |
 | Alarm | `smart_alarm.dart` | Fires on N1 or wake inside the window, only after ≥ 60 min of tracking **and** after deeper sleep was reached |
 
 Stage rules, in order:
-1. Lots of movement → Awake. Brief movement → N1 (sleep lightening).
+1. Lots of movement → Awake. Brief movement → N1 (sleep lightening), or
+   still Awake if you were just awake.
 2. Snoring → N2 (N3 if still for 10+ min with very regular breathing).
 3. Regular breathing → N2/N3; right after waking it is N1 first.
 4. Uneven breathing, no snoring → N1.
@@ -59,7 +60,12 @@ lib/core/       detection, alarm logic, metrics, advice, trends (no Flutter)
 lib/data/       JSON-per-night storage, WAV clips, CSV/JSON export
 lib/services/   microphone, alarm, background service, settings, tracking
 lib/ui/         screens and charts
-test/           unit tests, a simulated full night, screen render tests
+test/           unit tests, screen render tests, and end-to-end tests:
+                - e2e/full_night_audio_test: 7.5 h of synthesized bedroom audio
+                  (breathing, snores, rustling, optional fan) through the whole
+                  pipeline, smart alarm and saving
+                - e2e/app_flow_test: drives the real screens from Tonight to
+                  the morning report and History
 docs/           plan, privacy policy draft, store listing notes, device tests
 ```
 
@@ -69,7 +75,8 @@ Requires Flutter 3.47+.
 
 ```sh
 flutter pub get
-flutter test                 # 42 tests
+flutter test                 # 47 tests, ~3 min (two full simulated nights)
+flutter test test/core test/data test/services test/ui   # fast subset
 flutter analyze
 flutter run                  # on a connected phone
 ```
@@ -91,5 +98,5 @@ SCREENSHOT_DIR=/tmp/shots FLUTTER_ROOT=$(dirname $(dirname $(which flutter))) fl
 ## Before release
 
 See `docs/DEVICE_TESTING.md` and `docs/STORE_LISTING.md`. Still open:
-app name, app icon, bundle/application IDs, release signing, and on-device
+app icon, bundle/application IDs, release signing, and on-device
 testing (not possible in the cloud environment this was built in).

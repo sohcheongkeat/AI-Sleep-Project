@@ -92,5 +92,7 @@ void main() {
     final session = run([(Phase.awake, 2)]);
     expect(session.alarm, isNull);
     expect(session.epochs.length, 3); // last partial epoch not yet closed
+    session.finish();
+    expect(session.epochs.length, 4, reason: 'the final 29.9 s are counted on stop');
   });
 }

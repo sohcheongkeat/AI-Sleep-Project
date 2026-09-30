@@ -15,6 +15,13 @@ void main() {
       expect(SleepStager().classify(const EpochInput(movement: 0.3, snores: 0)).stage, Stage.wake);
     });
 
+    test('a little movement right after being awake is still awake', () {
+      final s = SleepStager();
+      s.classify(const EpochInput(movement: 0.3, snores: 0));
+      expect(s.classify(const EpochInput(movement: 0.05, snores: 0)).stage, Stage.wake);
+      expect(s.classify(still()).stage, Stage.n1);
+    });
+
     test('sleep onset passes through N1 before N2', () {
       final s = SleepStager();
       s.classify(const EpochInput(movement: 0.3, snores: 0));

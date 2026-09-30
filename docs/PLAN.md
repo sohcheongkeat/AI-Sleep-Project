@@ -57,6 +57,7 @@ during light sleep (N1) inside a chosen window before their wake-up time.
 
 ## Open items
 
-- App name (placeholder "AI Sleep"), icon, bundle/application IDs, release signing
+- ~~App name~~ — Sleep Coach
+- Icon, bundle/application IDs, release signing
 - On-device testing (Android SDK / iOS toolchain not available in the build environment)
 - Calibrate detection thresholds on real nights

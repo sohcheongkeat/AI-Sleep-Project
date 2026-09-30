@@ -1,11 +1,11 @@
-# Privacy Policy — AI Sleep (DRAFT)
+# Privacy Policy — Sleep Coach (DRAFT)
 
 > Draft for review. Replace the bracketed items and have it checked before
 > publishing. It must match what the app actually does.
 
 _Last updated: [date]_
 
-AI Sleep ("the app") is made by [developer name] ("we").
+Sleep Coach ("the app") is made by [developer name] ("we").
 
 ## Summary
 

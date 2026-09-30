@@ -10,8 +10,14 @@ import 'package:flutter_test/flutter_test.dart';
 Float64List tone(double hz, {double amp = 0.3, int n = 1600, int sr = 16000}) =>
     Float64List.fromList(List.generate(n, (i) => amp * math.sin(2 * math.pi * hz * i / sr)));
 
-FrameFeatures f(double level, {double low = 0.3, double high = 0.1}) =>
-    FrameFeatures(levelDb: level, lowRatio: low, highRatio: high, breathDb: -70);
+FrameFeatures f(double level, {double low = 0.3, double high = 0.1}) => FrameFeatures(
+      levelDb: level,
+      lowRatio: low,
+      highRatio: high,
+      breathDb: -70,
+      lowDb: low >= 0.45 ? level : -60,
+      highDb: high >= 0.2 ? level : -60,
+    );
 
 void main() {
   group('fft', () {
@@ -70,6 +76,19 @@ void main() {
       expect(ev!.duration, closeTo(1.2, 0.15));
     });
 
+    test('ignores breathing that is audible but not a snore', () {
+      final d = SnoreDetector();
+      var t = 0.0;
+      for (; t < 10; t += 0.1) {
+        d.push(t, f(-60, low: 0.5));
+      }
+      // Breath at +12 dB in the snore band: below the 15 dB threshold.
+      for (final end = t + 1.5; t < end; t += 0.1) {
+        d.push(t, f(-48, low: 0.5));
+      }
+      expect(d.push(t, f(-60, low: 0.5)), isNull);
+    });
+
     test('ignores high-frequency bursts and very long sounds', () {
       final d = SnoreDetector();
       var t = 0.0;
@@ -95,7 +114,7 @@ void main() {
         d.push(t, f(-60));
       }
       for (final end = t + 3; t < end; t += 0.1) {
-        d.push(t, f(-45, low: 0.2, high: 0.5));
+        d.push(t, f(-35, low: 0.2, high: 0.5));
       }
       expect(d.push(t, f(-60)), isNotNull);
       for (final end = t + 1.2; t < end; t += 0.1) {

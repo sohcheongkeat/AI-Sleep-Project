@@ -95,7 +95,7 @@ class SleepSession {
     }
   }
 
-  void _closeEpoch() {
+  void _closeEpoch({bool checkAlarm = true}) {
     // Estimate breathing over the last 60 s so slow rhythms span enough cycles.
     final breathing = estimateBreathing([..._prevEnvelope, ..._envelope], frameRate);
     final input = EpochInput(
@@ -122,11 +122,17 @@ class SleepSession {
     _epochMovementS = 0;
 
     final a = alarm;
-    if (a != null) {
+    if (a != null && checkAlarm) {
       final now = start.add(Duration(seconds: _epochStart.round()));
       final reason = a.update(now, result.stage);
       if (reason != null) onAlarm?.call(reason, now);
     }
+  }
+
+  /// Closes the unfinished last epoch when tracking stops, so its snores and
+  /// stage are counted. Less than 10 s of sound is dropped as too little to judge.
+  void finish() {
+    if (_envelope.length >= frameRate * 10) _closeEpoch(checkAlarm: false);
   }
 
   Stage? get currentStage => epochs.isEmpty ? null : epochs.last.stage;

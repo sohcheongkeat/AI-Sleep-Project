@@ -51,6 +51,7 @@ class _Burst {
 /// mostly match [frameMatches] and whose duration is within bounds.
 class _BurstDetector {
   _BurstDetector({
+    required this.level,
     required this.thresholdDb,
     required this.minDurationS,
     required this.maxDurationS,
@@ -58,6 +59,8 @@ class _BurstDetector {
     NoiseFloor? floor,
   }) : floor = floor ?? NoiseFloor();
 
+  /// Which loudness to compare with the noise floor.
+  final double Function(FrameFeatures) level;
   final double thresholdDb;
   final double minDurationS;
   final double maxDurationS;
@@ -66,13 +69,14 @@ class _BurstDetector {
   _Burst? _burst;
 
   SoundEvent? push(double t, FrameFeatures f) {
-    floor.update(t, f.levelDb);
-    final loud = f.levelDb - floor.db >= thresholdDb;
+    final db = level(f);
+    floor.update(t, db);
+    final loud = db - floor.db >= thresholdDb;
     if (loud) {
-      final b = _burst ??= _Burst(t, f.levelDb);
+      final b = _burst ??= _Burst(t, db);
       b.frames++;
       if (frameMatches(f)) b.matchingFrames++;
-      b.peakDb = math.max(b.peakDb, f.levelDb);
+      b.peakDb = math.max(b.peakDb, db);
       return null;
     }
     final b = _burst;
@@ -88,22 +92,27 @@ class _BurstDetector {
   }
 }
 
-/// Snore: a loud, low-frequency (60–500 Hz) burst about as long as an
-/// inhalation (0.3–3.5 s).
+/// Snore: a loud burst in the 60–500 Hz band about as long as an inhalation
+/// (0.3–3.5 s). Measured in that band only, because audible breathing is
+/// itself 10+ dB above a quiet room's floor but carries little low-frequency
+/// energy; a snore is 30–40 dB above it.
 class SnoreDetector extends _BurstDetector {
-  SnoreDetector({super.thresholdDb = 10, double minLowRatio = 0.45})
+  SnoreDetector({super.thresholdDb = 15, double minLowRatio = 0.45})
       : super(
+          level: (f) => f.lowDb,
           minDurationS: 0.3,
           maxDurationS: 3.5,
           frameMatches: (f) => f.lowRatio >= minLowRatio,
         );
 }
 
-/// Movement: a broadband rustle (bedding, turning over) with noticeable
-/// high-frequency content. Very long sounds (TV, traffic) are ignored.
+/// Movement: a rustle (bedding, turning over) measured in the 2–7.5 kHz
+/// band. Breathing reaches ~+14 dB there in a quiet room, rustling ~+30 dB,
+/// hence the 20 dB threshold. Very long sounds (TV, traffic) are ignored.
 class MovementDetector extends _BurstDetector {
-  MovementDetector({super.thresholdDb = 8, double minHighRatio = 0.2})
+  MovementDetector({super.thresholdDb = 20, double minHighRatio = 0.2})
       : super(
+          level: (f) => f.highDb,
           minDurationS: 0.4,
           maxDurationS: 20,
           frameMatches: (f) => f.highRatio >= minHighRatio,

@@ -90,7 +90,11 @@ class SleepStager {
     if (e.movement >= c.wakeMovement) {
       (stage, reason) = (Stage.wake, 'lots of movement');
     } else if (e.movement >= c.minorMovement) {
-      (stage, reason) = (Stage.n1, 'brief movement');
+      // Right after being awake, any movement means still restless; only a
+      // fully still epoch counts as drifting off.
+      (stage, reason) = _prev == Stage.wake
+          ? (Stage.wake, 'still restless')
+          : (Stage.n1, 'brief movement');
     } else if (e.snores >= c.snoresForSleep) {
       (stage, reason) = (_deepOr(Stage.n2, reg), 'snoring');
     } else if (reg != null && reg >= c.regularBreathing) {
